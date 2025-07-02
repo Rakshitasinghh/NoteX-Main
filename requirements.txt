@@ -5,4 +5,4 @@ youtube-transcript-api==0.6.1
 requests==2.31.0
 beautifulsoup4==4.12.3
 transformers==4.41.1
-torch==2.2.2
+torch==2.7.1
