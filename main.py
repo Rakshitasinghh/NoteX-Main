@@ -4,25 +4,57 @@ import docx
 from youtube_transcript_api import YouTubeTranscriptApi
 import requests
 from bs4 import BeautifulSoup
-from transformers import pipeline
-import re
+from transformers import pipeline # pre-trained BERT models for summarization and Q&A
+import re #splitting and sectioning text using regex
 
 # Load models
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
 
-# Custom CSS for cleaner look
+# bit of CSS 
 st.markdown("""
     <style>
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
-        body { background: linear-gradient(135deg, #6e7dff, #ff6ec7); background-size: 400% 400%; animation: gradientBackground 15s ease infinite; margin: 0; height: 100vh; }
-        @keyframes gradientBackground { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .css-1v0mbdj.etr89bj1 { background-color: #f4f9fc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
-        .block-container { padding: 1.5rem 2rem; border-radius: 10px; animation: slideUp 1s ease-out; }
-        @keyframes slideUp { 0% { transform: translateY(50px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        h1:hover, h2:hover, h3:hover { color: #ff6ec7; transform: scale(1.1); transition: all 0.3s ease-in-out; }
+        body {
+            background: linear-gradient(135deg, #6e7dff, #ff6ec7);
+            background-size: 400% 400%;
+            animation: gradientBackground 15s ease infinite;
+            margin: 0; height: 100vh;
+        }
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .css-1v0mbdj.etr89bj1 {
+            background-color: #f4f9fc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .block-container {
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            animation: slideUp 1s ease-out;
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        h1:hover, h2:hover, h3:hover {
+            color: #ff6ec7;
+            transform: scale(1.1);
+            transition: all 0.3s ease-in-out;
+        }
     </style>
+""", unsafe_allow_html=True) #allows html to render inside the project
+
+#  PAGE HEADER 
+st.markdown("""
+    <h1 style='text-align: center; color:#4682B4;'>NoteX</h1>
+    <h4 style='text-align: center; color:#87CEFA;'>Smart summaries, smarter learning.</h4>
+    <hr style='border:1px solid #ddd;'/>
 """, unsafe_allow_html=True)
+
 
 # Header
 st.markdown("""
@@ -31,7 +63,7 @@ st.markdown("""
     <hr style='border:1px solid #ddd;'/>
 """, unsafe_allow_html=True)
 
-# --- Extraction Functions ---
+# Extraction Functions
 def extract_text_from_pdf(uploaded_file):
     text = ''
     with pdfplumber.open(uploaded_file) as pdf:
@@ -63,7 +95,7 @@ def extract_text_from_url(url):
     except Exception as e:
         return f"Error: {str(e)}"
 
-# --- Summarization ---
+# Summarization
 def summarize_by_sections(text):
     sections = re.split(r'\n(?=\d+\.\s|Chapter\s+\d+|Section\s+\d+)', text)
     summaries = {}
@@ -72,7 +104,7 @@ def summarize_by_sections(text):
         sec = sec.strip()
         word_count = len(sec.split())
         if word_count > 20:
-            short_text = sec[:1000]
+            short_text = sec[:1000]  # Limit to avoid token overflow
             max_len = min(150, max(13, int(word_count * 0.5)))
             min_len = max(10, int(max_len * 0.6))
             try:
@@ -140,7 +172,7 @@ if st.button("🪄 Summarize"):
     else:
         st.error("Please upload or paste something first!")
 
-# Q&A Section 
+# Q&A Section, distilbert-base-cased-distilled-squad (model)
 if 'summary' in st.session_state:
     st.subheader("Ask a Doubt")
     question = st.text_input("Enter your question:")
@@ -151,7 +183,7 @@ if 'summary' in st.session_state:
         else:
             st.warning("Please type your question.")
 
-# --- Footer ---
+# Footer
 st.markdown("""
     <hr>
     <p style='text-align: center; font-size: 11px;'>Made by Rakshita| © 2025 EduSummarizer</p>
